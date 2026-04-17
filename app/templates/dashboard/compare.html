@@ -1,0 +1,351 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Compare Funds | FundScope{% endblock %}
+{% block page_title %}Compare Funds{% endblock %}
+{% block page_subtitle %}Side-by-side analysis and performance visualization for multiple funds.{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-7xl mx-auto">
+    <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-surface-container-high dark:border-slate-700 relative z-20 transition-colors">
+        <h3 class="text-lg font-headline font-bold text-on-surface dark:text-white mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary dark:text-blue-400">query_stats</span>
+            Select Funds to Compare
+        </h3>
+        
+        <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
+            <div class="flex-1 w-full relative group" id="fund-search-container">
+                <label class="block text-sm font-semibold text-on-surface-variant dark:text-slate-300 mb-2">Search & Add Funds (Max 5)</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline dark:text-slate-500">search</span>
+                    <input type="text" id="fund-search" autocomplete="off" class="w-full pl-10 pr-4 py-3 bg-surface-container-low dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 border border-surface-container-high dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm" placeholder="Type fund name (e.g. Parag Parikh Flexi Cap Fund)...">
+                </div>
+                <div id="search-dropdown" class="absolute w-full mt-2 bg-surface-container-lowest dark:bg-slate-800 border border-surface-container-high dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto hidden z-50 transition-colors">
+                    <ul id="dropdown-list" class="py-2">
+                        </ul>
+                </div>
+            </div>
+            
+            <button id="compare-btn" class="px-6 py-3 bg-primary hover:bg-primary-fixed-variant text-white font-bold rounded-xl shadow-lg shadow-primary/30 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed w-full lg:w-auto h-12" disabled>
+                <span class="material-symbols-outlined">compare_arrows</span>
+                <span>Compare Now</span>
+            </button>
+        </div>
+        
+        <div class="mt-5 flex flex-wrap gap-2 min-h-[32px]" id="selected-funds-container">
+            </div>
+    </div>
+
+    <div id="comparison-results" class="hidden animate-fade-in-up z-10 relative">
+        <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-2xl shadow-sm border border-surface-container-high dark:border-slate-700 overflow-hidden transition-colors">
+            <div class="overflow-x-auto w-full compare-table-scroll">
+                <table class="w-full text-left border-collapse" id="compare-table">
+                    <thead>
+                        <tr class="bg-surface-container dark:bg-slate-900/50 border-b border-surface-container-high dark:border-slate-700 transition-colors" id="table-header">
+                            <th class="p-4 font-bold text-on-surface-variant dark:text-slate-400 w-48 sticky left-0 z-20 bg-surface-container dark:bg-slate-900 shadow-[1px_0_0_0_#e1e3e4] dark:shadow-[1px_0_0_0_#334155]">Parameters</th>
+                            </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container-high dark:divide-slate-700" id="table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div id="empty-state" class="py-20 text-center animate-fade-in-up">
+        <div class="w-24 h-24 mx-auto bg-surface-container dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 text-outline dark:text-slate-500 shadow-inner">
+            <span class="material-symbols-outlined text-5xl">stacked_bar_chart</span>
+        </div>
+        <h4 class="text-2xl font-headline font-bold text-on-surface dark:text-white">No Funds Selected</h4>
+        <p class="text-on-surface-variant dark:text-slate-400 mt-3 max-w-md mx-auto text-sm leading-relaxed">Search and select up to 5 funds above to compare their performance, risks, and ratings side by side in a detailed view.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Scrollbar for dropdown */
+    #search-dropdown::-webkit-scrollbar, .compare-table-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    #search-dropdown::-webkit-scrollbar-track, .compare-table-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    #search-dropdown::-webkit-scrollbar-thumb, .compare-table-scroll::-webkit-scrollbar-thumb {
+        background-color: #c3c6d7;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+    .dark #search-dropdown::-webkit-scrollbar-thumb, .dark .compare-table-scroll::-webkit-scrollbar-thumb {
+        background-color: #475569;
+    }
+    #search-dropdown::-webkit-scrollbar-thumb:hover, .compare-table-scroll::-webkit-scrollbar-thumb:hover {
+        background-color: #737686;
+    }
+    
+    .compare-table-scroll th, .compare-table-scroll td {
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let allFunds = [];
+    let selectedFunds = new Set();
+    
+    const searchInput = document.getElementById('fund-search');
+    const searchDropdown = document.getElementById('search-dropdown');
+    const dropdownList = document.getElementById('dropdown-list');
+    const selectedFundsContainer = document.getElementById('selected-funds-container');
+    const compareBtn = document.getElementById('compare-btn');
+    const comparisonResults = document.getElementById('comparison-results');
+    const tableHeader = document.getElementById('table-header');
+    const tableBody = document.getElementById('table-body');
+    const emptyState = document.getElementById('empty-state');
+    const maxFunds = 5;
+
+    // Fetch fund names
+    fetch('{{ url_for("dashboard.get_funds") }}')
+        .then(res => res.json())
+        .then(funds => {
+            allFunds = funds;
+        })
+        .catch(err => {
+            console.error("Error fetching funds:", err);
+        });
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        dropdownList.innerHTML = '';
+        
+        if (!query) {
+            searchDropdown.classList.add('hidden');
+            return;
+        }
+
+        const filtered = allFunds.filter(f => f.toLowerCase().includes(query) && !selectedFunds.has(f)).slice(0, 50);
+        
+        if (filtered.length > 0) {
+            filtered.forEach(fund => {
+                const li = document.createElement('li');
+                // ADDED DARK MODE HOVER AND TEXT CLASSES HERE
+                li.className = 'px-5 py-3 hover:bg-surface-container dark:hover:bg-slate-700 cursor-pointer text-sm font-medium transition-colors border-b border-surface-container-high/50 dark:border-slate-700 last:border-0 text-on-surface dark:text-slate-200';
+                
+                const regex = new RegExp(`(${query})`, "gi");
+                const highlighted = fund.replace(regex, "<span class='text-primary dark:text-blue-400 font-bold'>$1</span>");
+                li.innerHTML = highlighted;
+                
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); 
+                    addFund(fund);
+                    searchInput.value = '';
+                    searchDropdown.classList.add('hidden');
+                });
+                dropdownList.appendChild(li);
+            });
+            searchDropdown.classList.remove('hidden');
+        } else {
+            const li = document.createElement('li');
+            li.className = 'px-4 py-4 text-sm text-outline dark:text-slate-500 italic text-center';
+            li.textContent = 'No available funds matching your search';
+            dropdownList.appendChild(li);
+            searchDropdown.classList.remove('hidden');
+        }
+    });
+
+    searchInput.addEventListener('blur', () => {
+        searchDropdown.classList.add('hidden');
+    });
+    
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim() && dropdownList.children.length > 0) {
+            searchDropdown.classList.remove('hidden');
+        }
+    });
+
+    function addFund(fund) {
+        if (selectedFunds.size >= maxFunds) {
+            alert(`You can compare up to ${maxFunds} funds at a time.`);
+            return;
+        }
+        selectedFunds.add(fund);
+        renderSelectedFunds();
+        updateCompareButton();
+    }
+
+    function removeFund(fund) {
+        selectedFunds.delete(fund);
+        renderSelectedFunds();
+        updateCompareButton();
+        if (selectedFunds.size === 0) {
+            comparisonResults.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+        }
+    }
+
+    function renderSelectedFunds() {
+        selectedFundsContainer.innerHTML = '';
+        selectedFunds.forEach(fund => {
+            const chip = document.createElement('div');
+            // ADDED DARK MODE CHIP CLASSES
+            chip.className = 'flex items-center space-x-1.5 bg-secondary-fixed dark:bg-blue-900/40 border border-secondary-fixed-dim dark:border-blue-800 text-on-secondary-fixed dark:text-blue-100 text-xs font-bold px-3 py-1.5 rounded-lg animate-fade-in-up';
+            chip.innerHTML = `
+                <span class="truncate max-w-[220px] pb-px">${fund}</span>
+                <button type="button" class="material-symbols-outlined text-[16px] hover:text-error dark:hover:text-red-400 transition-colors p-0.5 rounded-full hover:bg-white/30 dark:hover:bg-black/20" data-fund="${fund}">close</button>
+            `;
+            const closeBtn = chip.querySelector('button');
+            closeBtn.onclick = () => removeFund(fund);
+            selectedFundsContainer.appendChild(chip);
+        });
+    }
+
+    function updateCompareButton() {
+        compareBtn.disabled = selectedFunds.size === 0;
+    }
+
+    compareBtn.addEventListener('click', () => {
+        if (selectedFunds.size === 0) return;
+        
+        const fundsArray = Array.from(selectedFunds);
+        const originalText = compareBtn.innerHTML;
+        compareBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Analyzing...</span>';
+        compareBtn.disabled = true;
+
+        fetch('{{ url_for("dashboard.compare_data") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ funds: fundsArray })
+        })
+        .then(res => res.json())
+        .then(data => {
+            renderComparison(data);
+            emptyState.classList.add('hidden');
+            comparisonResults.classList.remove('hidden');
+            comparisonResults.classList.remove('animate-fade-in-up');
+            void comparisonResults.offsetWidth; 
+            comparisonResults.classList.add('animate-fade-in-up');
+        })
+        .catch(err => {
+            console.error("Comparison Error:", err);
+            alert("Failed to compare funds. Please try again.");
+        })
+        .finally(() => {
+            compareBtn.innerHTML = originalText;
+            compareBtn.disabled = false;
+        });
+    });
+
+    const metricsMap = [
+        { key: 'category', label: 'Category', icon: 'category' },
+        { key: 'rating', label: 'Rating', icon: 'star', format: val => val ? `<div class="flex items-center gap-1 text-amber-600 font-bold bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded w-max">${val} <span class="material-symbols-outlined text-[14px]">star</span></div>` : '<span class="text-outline dark:text-slate-500">N/A</span>' },
+        { key: 'risk_level', label: 'Risk Level', icon: 'warning', format: val => val ? `<span class="px-2 py-1 bg-surface-container-high dark:bg-slate-700 dark:text-slate-200 rounded text-xs font-bold uppercase tracking-wider">${val}</span>` : '<span class="text-outline dark:text-slate-500">N/A</span>' },
+        { key: 'returns_1yr', label: '1Y Return', icon: 'trending_up', format: val => formatPercent(val) },
+        { key: 'returns_3yr', label: '3Y Return', icon: 'trending_up', format: val => formatPercent(val) },
+        { key: 'returns_5yr', label: '5Y Return', icon: 'trending_up', format: val => formatPercent(val) },
+        { key: 'expense_ratio', label: 'Expense Ratio', icon: 'payments', format: val => formatPercent(val, true) },
+        { key: 'fund_size_cr', label: 'Fund Size (Cr)', icon: 'account_balance', format: val => val ? `<span class="font-bold dark:text-white">₹${Number(val).toLocaleString()}</span>` : '<span class="text-outline dark:text-slate-500">N/A</span>' }
+    ];
+
+    function formatPercent(val, inverseColor = false) {
+        if (val == null || val === '') return '<span class="text-outline dark:text-slate-500">N/A</span>';
+        const num = parseFloat(val);
+        if (isNaN(num)) return val;
+        
+        let color = 'text-on-surface dark:text-slate-200';
+        if (num > 0) color = inverseColor ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
+        else if (num < 0) color = inverseColor ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+        else if (num === 0) color = 'text-outline dark:text-slate-500';
+
+        const arrow = num > 0 ? '↗' : (num < 0 ? '↘' : '');
+        return `<span class="font-bold tracking-tight inline-flex items-center gap-1 bg-surface dark:bg-slate-900/50 py-1 px-2 rounded box-border ${color}">${arrow} ${Math.abs(num).toFixed(2)}%</span>`;
+    }
+
+    function renderComparison(data) {
+        tableHeader.innerHTML = '<th class="p-4 font-bold text-on-surface-variant dark:text-slate-400 text-sm tracking-wide uppercase w-48 sticky left-0 z-20 bg-surface-container dark:bg-slate-900 shadow-[1px_0_0_0_#e1e3e4] dark:shadow-[1px_0_0_0_#334155]">Parameters</th>';
+        data.forEach(fund => {
+            const th = document.createElement('th');
+            // DARK MODE TABLE HEADER
+            th.className = 'p-5 min-w-[280px] align-top bg-surface-container-lowest dark:bg-slate-800 border-t-4 border-t-primary';
+            th.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[15px] font-headline font-bold text-on-surface dark:text-white leading-tight pr-2">${fund.scheme_name}</div>
+                    <button onclick="toggleFavorite('${fund.scheme_name}', this)" class="text-3xl transition-transform hover:scale-110 focus:outline-none flex-shrink-0" title="Toggle Watchlist">
+                        <span class="text-gray-400 hover:text-red-500 empty-heart select-none transition-colors">♡</span>
+                    </button>
+                </div>
+                <div class="text-xs text-on-surface-variant dark:text-slate-400">${fund.category || 'Mutual Fund'}</div>
+            `;
+            tableHeader.appendChild(th);
+        });
+
+        tableBody.innerHTML = '';
+        metricsMap.forEach((metric, index) => {
+            const tr = document.createElement('tr');
+            // DARK MODE TABLE ROWS
+            tr.className = index % 2 === 0 ? 'bg-surface-container-lowest dark:bg-slate-800 hover:bg-surface-container/30 dark:hover:bg-slate-700/50 transition-colors' : 'bg-surface-container-low/30 dark:bg-slate-800/50 hover:bg-surface-container/30 dark:hover:bg-slate-700/50 transition-colors';
+            
+            const th = document.createElement('th');
+            th.className = 'p-4 text-sm font-semibold text-on-surface-variant dark:text-slate-300 sticky left-0 z-10 shadow-[1px_0_0_0_#e1e3e4] dark:shadow-[1px_0_0_0_#334155] bg-inherit';
+            th.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px] opacity-70">${metric.icon}</span>
+                    <span>${metric.label}</span>
+                </div>
+            `;
+            tr.appendChild(th);
+
+            data.forEach(fund => {
+                const td = document.createElement('td');
+                // DARK MODE TABLE CELLS
+                td.className = 'p-4 text-sm text-on-surface dark:text-slate-200 border-l border-surface-container-high/50 dark:border-slate-700';
+                const val = fund[metric.key];
+                td.innerHTML = metric.format ? metric.format(val) : (val || '<span class="text-outline dark:text-slate-500">N/A</span>');
+                tr.appendChild(td);
+            });
+
+            tableBody.appendChild(tr);
+        });
+    }
+});
+
+// HEART BUTTON LOGIC - Updated with text-gray-400
+async function toggleFavorite(fundName, btnElement) {
+    try {
+        const response = await fetch('/api/toggle_favorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fund_id: fundName })
+        });
+
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await response.json();
+        const iconSpan = btnElement.querySelector('span');
+
+        if (data.status === 'removed') {
+            iconSpan.innerHTML = '♡';
+            iconSpan.classList.remove('text-red-500', 'filled-heart');
+            iconSpan.classList.add('text-gray-400', 'empty-heart');
+        } else if (data.status === 'added') {
+            iconSpan.innerHTML = '♥';
+            iconSpan.classList.remove('text-gray-400', 'empty-heart');
+            iconSpan.classList.add('text-red-500', 'filled-heart');
+        }
+    } catch (error) {
+        console.error("Error toggling favorite:", error);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends "layout/base.html" %}
+
+{% block title %}AI Insights - FundScope{% endblock %}
+{% block page_title %}AI Insights{% endblock %}
+{% block page_subtitle %}Personalized intelligence for your wealth journey.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <div class="mb-8 relative rounded-2xl overflow-hidden p-10 primary-gradient text-white shadow-2xl shadow-blue-500/20">
+        <div class="relative z-10 max-w-2xl">
+            <h3 class="font-headline text-4xl font-bold mb-4">AI-Powered Investment Insights</h3>
+            <p class="text-lg opacity-90 leading-relaxed font-medium">Tell us about your goals, and our AI will curate the perfect fund portfolio for you. We analyze over 5,000 mutual funds to find your ideal match.</p>
+        </div>
+        <div class="absolute right-[-5%] top-[-20%] opacity-10 pointer-events-none">
+            <span class="material-symbols-outlined text-[240px]" style="font-variation-settings: 'FILL' 1;">psychology</span>
+        </div>
+    </div>
+
+    <div class="space-y-8">
+        <section class="bg-surface-container-lowest dark:bg-slate-800 p-8 rounded-xl shadow-sm border border-outline-variant/10 dark:border-slate-700 transition-colors">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <h4 class="font-headline text-xl font-bold dark:text-white">Personal Profile</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 block">User Name</label>
+                    <input id="username" class="w-full bg-surface-container-low dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 font-medium transition-colors" placeholder="e.g. Aarav (Aggressive)" type="text"/>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 block">Age</label>
+                    <div class="flex items-center space-x-4">
+                        <input id="age" class="flex-1 accent-primary h-2 bg-surface-container-high dark:bg-slate-700 rounded-full appearance-none cursor-pointer" max="80" min="18" type="range" value="32" oninput="document.getElementById('ageValue').innerText = this.value + ' yrs'"/>
+                        <span id="ageValue" class="bg-primary-fixed dark:bg-blue-900/50 text-primary dark:text-blue-300 px-3 py-1 rounded-md font-bold text-sm">32 yrs</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-surface-container-lowest dark:bg-slate-800 p-8 rounded-xl shadow-sm border border-outline-variant/10 dark:border-slate-700 transition-colors">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+                <h4 class="font-headline text-xl font-bold dark:text-white">Investment Parameters</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 block">Investment Amount</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant dark:text-slate-400">₹</span>
+                        <input id="amount" class="w-full bg-surface-container-low dark:bg-slate-900 dark:text-white border-none rounded-lg p-4 pl-8 focus:ring-2 focus:ring-primary/20 font-medium transition-colors" type="number" placeholder="10000" value="10000"/>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 block">Time Frame</label>
+                    <select id="timeframe" class="w-full bg-surface-container-low dark:bg-slate-900 dark:text-white border-none rounded-lg p-4 focus:ring-2 focus:ring-primary/20 font-medium transition-colors">
+                        <option>Short Term (1-3 years)</option>
+                        <option>Medium Term (3-7 years)</option>
+                        <option>Long Term (7-12 years)</option>
+                        <option selected>Retirement (15+ years)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-surface-container-lowest dark:bg-slate-800 p-8 rounded-xl shadow-sm border border-outline-variant/10 dark:border-slate-700 transition-colors">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400">
+                    <span class="material-symbols-outlined">shield_with_heart</span>
+                </div>
+                <h4 class="font-headline text-xl font-bold dark:text-white">Risk Preferences</h4>
+            </div>
+            <div class="space-y-10">
+                <div class="grid grid-cols-3 gap-4">
+                    <button onclick="selectRisk(this)" class="risk p-4 rounded-xl border border-outline-variant/30 dark:border-slate-600 hover:bg-surface-container-high dark:hover:bg-slate-700 transition-colors" data-risk="Low">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 block mb-2">sentiment_satisfied</span>
+                        <span class="text-sm font-bold dark:text-white">Low Risk</span>
+                    </button>
+                    <button onclick="selectRisk(this)" class="risk p-4 rounded-xl border-2 border-primary dark:border-blue-500 bg-primary/5 dark:bg-blue-900/20" data-risk="Moderate">
+                        <span class="material-symbols-outlined text-primary dark:text-blue-400 block mb-2" style="font-variation-settings: 'FILL' 1;">sentiment_neutral</span>
+                        <span class="text-sm font-bold text-primary dark:text-blue-400">Moderate Risk</span>
+                    </button>
+                    <button onclick="selectRisk(this)" class="risk p-4 rounded-xl border border-outline-variant/30 dark:border-slate-600 hover:bg-surface-container-high dark:hover:bg-slate-700 transition-colors" data-risk="High">
+                        <span class="material-symbols-outlined text-orange-600 dark:text-orange-400 block mb-2">sentiment_very_satisfied</span>
+                        <span class="text-sm font-bold dark:text-white">High Risk</span>
+                    </button>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button onclick="selectCategory(this)" class="category flex-1 py-4 px-6 rounded-full bg-primary text-white font-bold text-sm shadow-md shadow-primary/20 flex items-center justify-center space-x-2" data-category="Equity">
+                        <span class="material-symbols-outlined text-lg">trending_up</span>
+                        <span>Equity</span>
+                    </button>
+                    <button onclick="selectCategory(this)" class="category flex-1 py-4 px-6 rounded-full bg-surface-container-high dark:bg-slate-700 text-on-surface-variant dark:text-slate-300 font-bold text-sm hover:bg-surface-container-highest dark:hover:bg-slate-600 transition-colors flex items-center justify-center space-x-2" data-category="Debt">
+                        <span class="material-symbols-outlined text-lg">account_balance</span>
+                        <span>Debt</span>
+                    </button>
+                    <button onclick="selectCategory(this)" class="category flex-1 py-4 px-6 rounded-full bg-surface-container-high dark:bg-slate-700 text-on-surface-variant dark:text-slate-300 font-bold text-sm hover:bg-surface-container-highest dark:hover:bg-slate-600 transition-colors flex items-center justify-center space-x-2" data-category="Hybrid">
+                        <span class="material-symbols-outlined text-lg">layers</span>
+                        <span>Hybrid</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="pt-8 pb-8 flex justify-center">
+            <button onclick="getRecommendations()" id="generateBtn" class="group relative px-12 py-5 rounded-2xl primary-gradient text-white font-headline text-xl font-extrabold shadow-xl shadow-blue-600/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center space-x-4 overflow-hidden">
+                <span class="relative z-10">Generate AI Insights</span>
+                <span class="material-symbols-outlined relative z-10">auto_awesome</span>
+            </button>
+        </div>
+
+        <div id="results" class="grid grid-cols-2 gap-6"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function selectRisk(btn) {
+        document.querySelectorAll('.risk').forEach(b => {
+            b.classList.remove('border-primary', 'dark:border-blue-500', 'bg-primary/5', 'dark:bg-blue-900/20', 'border-2');
+            b.classList.add('border', 'border-outline-variant/30', 'dark:border-slate-600');
+            b.querySelector('span:last-child').classList.remove('text-primary', 'dark:text-blue-400');
+            b.querySelector('span:last-child').classList.add('dark:text-white'); // Re-add white text for dark mode
+        });
+        btn.classList.add('border-primary', 'dark:border-blue-500', 'bg-primary/5', 'dark:bg-blue-900/20', 'border-2');
+        btn.classList.remove('border', 'border-outline-variant/30', 'dark:border-slate-600');
+        btn.querySelector('span:last-child').classList.remove('dark:text-white');
+        btn.querySelector('span:last-child').classList.add('text-primary', 'dark:text-blue-400');
+    }
+
+    function selectCategory(btn) {
+        document.querySelectorAll('.category').forEach(b => {
+            b.classList.remove('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
+            b.classList.add('bg-surface-container-high', 'dark:bg-slate-700', 'text-on-surface-variant', 'dark:text-slate-300');
+        });
+        btn.classList.remove('bg-surface-container-high', 'dark:bg-slate-700', 'text-on-surface-variant', 'dark:text-slate-300');
+        btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
+    }
+
+    async function getRecommendations() {
+        const riskEl = document.querySelector('.risk.border-primary');
+        const catEl = document.querySelector('.category.bg-primary');
+        const btn = document.getElementById("generateBtn");
+
+        const btnText = btn.querySelector('span:first-child');
+        btnText.innerText = "Analyzing Portfolios...";
+        btn.classList.add('animate-pulse');
+
+        const data = {
+            user_name: document.getElementById("username").value,
+            age: document.getElementById("age").value,
+            amount: document.getElementById("amount").value,
+            time_frame: document.getElementById("timeframe").value,
+            risk: riskEl ? riskEl.dataset.risk : 'Moderate',
+            category: catEl ? catEl.dataset.category : 'Equity'
+        };
+
+        try {
+            const res = await fetch("{{ url_for('ai.recommend') }}", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            displayResults(result);
+        } catch (err) {
+            console.error(err);
+            displayResults({ error: true });
+        } finally {
+            btnText.innerText = "Generate AI Insights";
+            btn.classList.remove('animate-pulse');
+        }
+    }
+
+    function displayResults(data) {
+        const div = document.getElementById("results");
+        div.innerHTML = "";
+
+        if(data.error || !data.recommendations) {
+            div.innerHTML = "<div class='col-span-2 text-center p-8 bg-surface-container-high dark:bg-slate-800 dark:text-slate-300 rounded-xl'>No highly matched funds found for these specific criteria.</div>";
+            return;
+        }
+
+        data.recommendations.forEach(f => {
+            div.innerHTML += `
+            <div class="bg-surface-container-lowest dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700 relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="pr-4">
+                        <span class="bg-secondary-fixed dark:bg-blue-900/30 text-on-secondary-fixed dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md mb-2 inline-block">${f.category}</span>
+                        <h3 class="font-headline font-bold text-lg leading-tight text-on-surface dark:text-white">${f.fund_name}</h3>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="toggleFavorite('${f.fund_name}', this)" class="text-3xl transition-transform hover:scale-110 focus:outline-none mt-1" title="Toggle Watchlist">
+                            <span class="text-gray-400 hover:text-red-500 empty-heart select-none transition-colors">♡</span>
+                        </button>
+                        <div class="w-12 h-12 bg-primary/5 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 text-primary dark:text-blue-400 font-bold shadow-inner">
+                            ${f.score}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 relative z-10">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase text-outline dark:text-slate-400 mb-1">3Yr Return</p>
+                        <p class="font-bold text-green-600 dark:text-green-400">${f.returns_3yr}%</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold uppercase text-outline dark:text-slate-400 mb-1">Sharpe Ratio</p>
+                        <p class="font-bold text-on-surface dark:text-slate-200">${f.sharpe}</p>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+    }
+
+// HEART BUTTON LOGIC
+async function toggleFavorite(fundName, btnElement) {
+    try {
+        const response = await fetch('/api/toggle_favorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fund_id: fundName })
+        });
+
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await response.json();
+        const iconSpan = btnElement.querySelector('span');
+
+        if (data.status === 'removed') {
+            iconSpan.innerHTML = '♡';
+            iconSpan.classList.remove('text-red-500', 'filled-heart');
+            iconSpan.classList.add('text-gray-400', 'empty-heart');
+        } else if (data.status === 'added') {
+            iconSpan.innerHTML = '♥';
+            iconSpan.classList.remove('text-gray-400', 'empty-heart');
+            iconSpan.classList.add('text-red-500', 'filled-heart');
+        }
+    } catch (error) {
+        console.error("Error toggling favorite:", error);
+    }
+}
+</script>
+{% endblock %}

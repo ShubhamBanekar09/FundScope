@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mutual Fund News</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <main class="page-shell container">
+        <section class="universe-header">
+            <div class="heading-row">
+                <h1>Fund Universe</h1>
+                <div class="category-tabs">
+                    {% for category, items in categories.items() %}
+                    {% set lead = items[0] if items else {} %}
+                    <button
+                        class="category-pill {% if category == default_category %}active{% endif %}"
+                        data-category="{{ category }}"
+                        data-feature-title="{{ lead.title if lead else category ~ ' mutual fund updates' }}"
+                        data-feature-summary="{{ lead.summary if lead else 'Latest mutual fund headlines and related market coverage.' }}"
+                        data-feature-link="{{ lead.link if lead else '#' }}"
+                    >
+                        {{ category }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if status_message %}
+            <div class="status-banner">{{ status_message }}</div>
+            {% endif %}
+
+            <div class="hero-grid">
+                <article class="featured-card">
+                    <span class="card-label">Featured Insight</span>
+                    <h2 id="featuredTitle">{{ featured_article.title }}</h2>
+                    <p id="featuredSummary">{{ featured_article.summary }}</p>
+                    <a id="featuredLink" href="{{ featured_article.link }}" target="_blank" rel="noopener noreferrer">
+                        Explore Detailed Analysis →
+                    </a>
+                </article>
+
+                <aside class="prompt-card">
+                    <h3>AI Analysis Prompt</h3>
+                    <p id="promptText">
+                        Compare {{ default_category }} funds with a focus on risk, return consistency, and SIP suitability.
+                    </p>
+                    <div class="prompt-badge">
+                        “Tracking {{ total_articles }} live mutual-fund headlines across 4 categories...”
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="toolbar-panel">
+            <div>
+                <h2>Top Mutual Fund News</h2>
+                <p>Each category shows up to 7 live related headlines. If only 4 are available, only 4 will be shown.</p>
+            </div>
+            <div class="toolbar">
+                <input type="text" id="searchInput" placeholder="Search in the active category..." />
+                <button type="button" id="refreshBtn" onclick="window.location.reload()">Refresh</button>
+            </div>
+            <div class="panel-meta">
+                <span id="resultsCount">{{ categories.get(default_category, [])|length }} stories</span>
+                <span>Last updated: {{ refreshed_at }}</span>
+            </div>
+        </section>
+
+        {% for category, articles in categories.items() %}
+        <section class="category-panel {% if category != default_category %}hidden{% endif %}" data-panel="{{ category }}">
+            <div class="section-title">
+                <div>
+                    <h3>{{ category }} News</h3>
+                    <p>Mutual funds and surrounding market updates curated for {{ category.lower() }} investors.</p>
+                </div>
+                <span class="section-pill">Top {{ articles|length }}</span>
+            </div>
+
+            {% if articles %}
+            <div class="news-grid">
+                {% for article in articles %}
+                <article
+                    class="news-card"
+                    data-title="{{ article.title|e }}"
+                    data-summary="{{ article.summary|e }}"
+                    data-source="{{ article.source|e }}"
+                    data-category="{{ category|e }}"
+                >
+                    <div class="news-meta">
+                        <span>{{ article.source }}</span>
+                        <span>{{ article.published }}</span>
+                    </div>
+                    <h4>{{ article.title }}</h4>
+                    <p>{{ article.summary }}</p>
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">Open original news ↗</a>
+                </article>
+                {% endfor %}
+            </div>
+            <p class="no-results hidden">No matching news found in this category.</p>
+            {% else %}
+            <div class="empty-state">
+                <p>No live mutual-fund news is available for this category right now.</p>
+            </div>
+            {% endif %}
+        </section>
+        {% endfor %}
+    </main>
+
+    <footer>
+        <p>© <span id="year"></span> Mutual Fund News</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

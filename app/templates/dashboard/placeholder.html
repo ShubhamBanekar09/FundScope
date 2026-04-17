@@ -1,0 +1,23 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{{ page_title }} - FundScope{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_subtitle %}{{ page_desc }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-20 text-center flex flex-col items-center justify-center space-y-6">
+    <div class="w-24 h-24 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-inner mb-4 relative overflow-hidden">
+        <span class="material-symbols-outlined text-5xl relative z-10">construction</span>
+        <div class="absolute inset-0 bg-gradient-to-tr from-transparent to-white/40"></div>
+    </div>
+    <h2 class="font-headline text-3xl font-extrabold text-on-surface">Under Construction</h2>
+    <p class="text-lg text-on-surface-variant max-w-lg mb-8">
+        We're actively building the <span class="font-bold text-primary">{{ page_title }}</span> module to bring you deeper insights and better organization. Check back soon!
+    </p>
+    
+    <a href="{{ url_for('dashboard.dashboard') }}" class="px-8 py-3 rounded-full bg-surface-container-high font-bold text-on-surface hover:bg-surface-container-highest transition-colors flex items-center space-x-2">
+        <span class="material-symbols-outlined">arrow_back</span>
+        <span>Return to Dashboard</span>
+    </a>
+</div>
+{% endblock %}

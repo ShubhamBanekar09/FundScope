@@ -1,0 +1,164 @@
+{% extends "layout/base.html" %}
+
+{% block title %}AI Chatbot - FundScope{% endblock %}
+{% block page_title %}AI Fund Assistant{% endblock %}
+{% block page_subtitle %}Have a conversation with our intelligent analytical curator.{% endblock %}
+
+{% block content %}
+<div class="flex flex-col h-[70vh] max-w-5xl mx-auto bg-surface-container-lowest dark:bg-slate-800 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700 overflow-hidden relative transition-colors">
+    
+    <div class="p-6 border-b border-surface-container-high dark:border-slate-700 flex items-center space-x-4 bg-surface-container-lowest/90 dark:bg-slate-800/90 backdrop-blur z-10 shrink-0 transition-colors">
+        <div class="w-12 h-12 rounded-full primary-gradient flex items-center justify-center text-white shadow-lg shrink-0">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">robot_2</span>
+        </div>
+        <div>
+            <h3 class="font-headline font-bold text-xl text-on-surface dark:text-white">FundScope Bot</h3>
+            <p class="text-xs text-green-600 dark:text-green-400 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-2 inline-block animate-pulse"></span> Online & Analyzing</p>
+        </div>
+        <div class="ml-auto">
+            <button id="clearChatBtn" class="p-2 bg-surface-container-low dark:bg-slate-700 hover:bg-surface-container-high dark:hover:bg-slate-600 rounded-full transition-colors text-on-surface-variant dark:text-slate-300 flex items-center justify-center" title="Start new conversation">
+                <span class="material-symbols-outlined">restart_alt</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 p-6 sm:p-8 overflow-y-auto space-y-6 bg-surface-container-lowest dark:bg-slate-800 scroll-smooth transition-colors" id="chatWindow">
+        <div class="flex space-x-4 max-w-3xl animate-fade-in-up">
+            <div class="w-8 h-8 rounded-full primary-gradient flex items-center justify-center text-white text-xs flex-shrink-0 mt-1 shadow-md">
+                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">robot_2</span>
+            </div>
+            <div class="bg-surface-container-low dark:bg-slate-700 p-4 rounded-2xl rounded-tl-sm text-on-surface dark:text-slate-100 leading-relaxed shadow-sm transition-colors">
+                <p>Hello! I am FundScope Bot, your specialized mutual fund assistant. How can I help you analyze funds or plan your investments today?</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="typingIndicator" class="hidden absolute bottom-24 left-6 sm:left-8 bg-surface-container-lowest dark:bg-slate-700 border border-surface-container-high dark:border-slate-600 p-3 rounded-2xl rounded-bl-sm flex space-x-1.5 items-center z-10 shadow-lg">
+        <span class="w-2 h-2 rounded-full bg-primary dark:bg-blue-400 animate-bounce opacity-70"></span>
+        <span class="w-2 h-2 rounded-full bg-primary dark:bg-blue-400 animate-bounce opacity-70" style="animation-delay: 0.15s"></span>
+        <span class="w-2 h-2 rounded-full bg-primary dark:bg-blue-400 animate-bounce opacity-70" style="animation-delay: 0.3s"></span>
+    </div>
+
+    <div class="p-4 sm:p-6 bg-surface dark:bg-slate-900 border-t border-surface-container-high dark:border-slate-700 z-10 shrink-0 transition-colors">
+        <form id="chatForm" class="relative max-w-4xl mx-auto flex items-center">
+            <input type="text" id="chatInput" autocomplete="off" placeholder="Ask about mutual funds, SIPs, or market trends..." class="w-full bg-surface-container-lowest dark:bg-slate-800 border border-surface-container-high dark:border-slate-700 rounded-full py-4 pl-6 pr-16 shadow-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-on-surface dark:text-white font-medium placeholder-outline dark:placeholder-slate-500" required>
+            <button type="submit" id="sendBtn" class="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-primary hover:bg-primary-fixed-variant text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 flex-shrink-0">
+                <span class="material-symbols-outlined ml-1">send</span>
+            </button>
+        </form>
+        <p class="text-center text-[10px] text-on-surface-variant dark:text-slate-500 mt-3 uppercase tracking-widest font-bold">Powered by Gemini &bull; Mutual Fund Context Only</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    #chatWindow::-webkit-scrollbar { width: 6px; }
+    #chatWindow::-webkit-scrollbar-thumb { background-color: #c3c6d7; border-radius: 10px; }
+    .dark #chatWindow::-webkit-scrollbar-thumb { background-color: #475569; }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const chatWindow = document.getElementById('chatWindow');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const sendBtn = document.getElementById('sendBtn');
+        const clearBtn = document.getElementById('clearChatBtn');
+
+        function scrollToBottom() {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function createMessageElement(content, isUser) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex space-x-4 max-w-[85%] ${isUser ? 'ml-auto justify-end' : ''} animate-fade-in-up mb-6`;
+
+            let avatarHtml = '';
+            if (isUser) {
+                // ADDED: Dark mode classes for the user's avatar circle
+                avatarHtml = `
+                <div class="w-8 h-8 rounded-full flex-shrink-0 mt-1 overflow-hidden shadow-sm bg-surface-container-high dark:bg-slate-700 border border-surface-container dark:border-slate-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-outline dark:text-slate-400 text-[18px]">person</span>
+                </div>`;
+            } else {
+                avatarHtml = `
+                <div class="w-8 h-8 rounded-full primary-gradient flex items-center justify-center text-white text-xs flex-shrink-0 mt-1 shadow-md">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">robot_2</span>
+                </div>`;
+            }
+
+            // ADDED: Dark mode classes for the chat bubbles
+            const messageHtml = `
+            <div class="${isUser ? 'bg-primary text-white shadow-md rounded-tr-sm' : 'bg-surface-container-low dark:bg-slate-700 text-on-surface dark:text-slate-100 shadow-sm rounded-tl-sm'} p-4 rounded-2xl leading-relaxed whitespace-pre-wrap break-words transition-colors">
+                ${escapeHtml(content)}
+            </div>`;
+
+            if (isUser) {
+                wrapper.innerHTML = messageHtml + avatarHtml;
+            } else {
+                wrapper.innerHTML = avatarHtml + messageHtml;
+            }
+
+            return wrapper;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if(!message) return;
+
+            chatWindow.appendChild(createMessageElement(message, true));
+            chatInput.value = '';
+            scrollToBottom();
+
+            typingIndicator.classList.remove('hidden');
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('{{ url_for("ai.chat_api") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                typingIndicator.classList.add('hidden');
+                
+                if (data.reply) {
+                    chatWindow.appendChild(createMessageElement(data.reply, false));
+                } else {
+                    chatWindow.appendChild(createMessageElement("Oops, I faced an error processing your query. " + (data.error || ""), false));
+                }
+            } catch (err) {
+                typingIndicator.classList.add('hidden');
+                chatWindow.appendChild(createMessageElement("Network error. Please try again.", false));
+            } finally {
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                chatInput.focus();
+                scrollToBottom();
+            }
+        });
+        
+        if(clearBtn) {
+            clearBtn.addEventListener('click', () => location.reload());
+        }
+    });
+</script>
+{% endblock %}

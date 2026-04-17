@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Compare - FundScope</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { "primary": "#004ac6", "surface": "#f8f9fa", "on-surface": "#191c1d" },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .primary-gradient { background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-x-hidden">
+    <!-- Navbar -->
+    <nav class="flex items-center justify-between p-8 max-w-7xl mx-auto">
+        <div class="flex items-center space-x-2">
+            <h1 class="font-headline text-2xl font-black text-blue-800">FundScope</h1>
+        </div>
+        <div class="hidden md:flex space-x-8 text-sm font-bold text-gray-500">
+            <a href="{{ url_for('auth.index') }}" class="hover:text-blue-600 transition-colors">Home</a>
+            <a href="{{ url_for('auth.features') }}" class="hover:text-blue-600 transition-colors">Features</a>
+            <a href="{{ url_for('auth.dashboard_info') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
+            <a href="{{ url_for('auth.compare_info') }}" class="text-blue-600 border-b-2 border-blue-600 pb-1">Compare</a>
+            <a href="{{ url_for('auth.about') }}" class="hover:text-blue-600 transition-colors">About</a>
+        </div>
+        <div class="flex items-center space-x-6">
+            <a href="{{ url_for('auth.login') }}" class="text-sm font-bold hover:text-blue-600">Login</a>
+            <a href="{{ url_for('auth.dashboard_info') }}" class="primary-gradient text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md hover:shadow-lg transition-transform hover:-translate-y-0.5">Explore</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="max-w-7xl mx-auto px-8 pt-16 pb-32 flex flex-col md:flex-row-reverse items-center justify-between">
+        <div class="md:w-1/2 md:pl-16 space-y-8 relative z-10">
+            <h1 class="font-headline text-5xl font-extrabold tracking-tight leading-[1.1]">
+                Side-by-Side Fund <span class="text-blue-600">Analysis</span>
+            </h1>
+            <p class="text-lg text-gray-600 max-w-md leading-relaxed">
+                Take the guesswork out of investing. Visually contrast expense ratios, historical returns, Sharpe ratios, and total AUM across your favorite schemes.
+            </p>
+            <div class="pt-4">
+                <a href="{{ url_for('auth.login') }}" class="inline-flex items-center justify-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200 px-6 py-3 rounded-xl font-bold hover:bg-blue-100 transition-colors">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span>Try the Compare Tool</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="md:w-1/2 mt-16 md:mt-0 relative flex justify-center">
+            <div class="absolute inset-0 primary-gradient rounded-[3rem] -rotate-6 scale-105 opacity-10 blur-xl"></div>
+            <img src="{{ url_for('static', filename='img/compare_graphic.png') }}" class="relative z-10 w-full max-w-[500px] rounded-[2rem] shadow-2xl border border-gray-100" alt="Compare Funds Graphic">
+        </div>
+    </main>
+</body>
+</html>

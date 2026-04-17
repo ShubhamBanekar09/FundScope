@@ -1,0 +1,106 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Settings - FundScope{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-8 py-10">
+    <div class="mb-10">
+        <h1 class="font-headline text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight transition-colors">{{ page_title }}</h1>
+        <p class="text-gray-500 dark:text-slate-400 mt-2 text-lg transition-colors">{{ page_desc }}</p>
+    </div>
+
+    <div class="space-y-8">
+        
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center space-x-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">person</span>
+                <span>Profile Details</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block mb-2">Full Name</label>
+                    <div class="bg-gray-50 dark:bg-slate-900 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 font-medium transition-colors">
+                        {{ user_name }}
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block mb-2">Email Address</label>
+                    <div class="bg-gray-50 dark:bg-slate-900 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 font-medium transition-colors">
+                        {{ user_email }}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">Edit Profile</button>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center space-x-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">tune</span>
+                <span>App Preferences</span>
+            </h2>
+            <div class="flex items-center justify-between py-4 border-b border-gray-100 dark:border-slate-700 transition-colors">
+                <div>
+                    <p class="font-bold text-gray-800 dark:text-white">Email Notifications</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">Receive weekly mutual fund insight reports.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+            <div class="flex items-center justify-between py-4">
+                <div>
+                    <p class="font-bold text-gray-800 dark:text-white">Dark Mode</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">Toggle the application interface theme.</p>
+                </div>
+                
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="settings-theme-toggle" class="sr-only peer" onchange="toggleTheme()">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+        </div> <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-red-100 dark:border-red-900/30 transition-colors">
+            <h2 class="text-xl font-bold text-red-600 dark:text-red-400 mb-6 flex items-center space-x-2">
+                <span class="material-symbols-outlined text-red-500">security</span>
+                <span>Account Security</span>
+            </h2>
+            
+            <div class="flex flex-col md:flex-row gap-4">
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center justify-center space-x-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-6 py-3 rounded-xl font-bold border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors w-full md:w-auto">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span>Sign Out</span>
+                </a>
+
+                <button class="flex items-center justify-center space-x-2 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 px-6 py-3 rounded-xl font-bold border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors w-full md:w-auto">
+                    <span class="material-symbols-outlined">key</span>
+                    <span>Change Password</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Sync the settings toggle switch with the current theme state
+    const settingsToggle = document.getElementById('settings-theme-toggle');
+    
+    function updateToggleState() {
+        if (document.documentElement.classList.contains('dark')) {
+            settingsToggle.checked = true;
+        } else {
+            settingsToggle.checked = false;
+        }
+    }
+
+    // Run on page load
+    updateToggleState();
+
+    // Listen for the custom event in case they click the top nav button while on the settings page
+    window.addEventListener('themeChanged', updateToggleState);
+</script>
+{% endblock %}

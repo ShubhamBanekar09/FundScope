@@ -1,0 +1,174 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Dashboard - FundScope{% endblock %}
+{% block page_title %}Market Overview{% endblock %}
+{% block page_subtitle %}Real-time analytical insights across your fund portfolio.{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-10">
+
+    <div class="grid grid-cols-4 gap-6">
+        <a href="{{ url_for('dashboard.factsheets') }}" class="bg-surface-container-lowest dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700 hover:shadow-md hover:border-primary/30 transition-all block group">
+            <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400 mb-4 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined">library_books</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 mb-1">Total PDFs</p>
+            <h3 class="font-headline text-3xl font-extrabold text-on-surface dark:text-white">{{ total_factsheets|default(0) }}</h3>
+        </a>
+        <div class="bg-surface-container-lowest dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700">
+            <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400 mb-4">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 mb-1">Funds Covered</p>
+            <h3 class="font-headline text-3xl font-extrabold text-on-surface dark:text-white">120</h3>
+        </div>
+        <div class="bg-surface-container-lowest dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700">
+            <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400 mb-4">
+                <span class="material-symbols-outlined">domain</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 mb-1">AMCs</p>
+            <h3 class="font-headline text-3xl font-extrabold text-on-surface dark:text-white">{{ total_amcs|default(0) }}</h3>
+        </div>
+        <div class="bg-surface-container-lowest dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700">
+            <div class="w-10 h-10 bg-primary-fixed dark:bg-blue-900/50 flex items-center justify-center rounded-lg text-primary dark:text-blue-400 mb-4">
+                <span class="material-symbols-outlined">history</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-wider text-outline dark:text-slate-400 mb-1">Latest Update</p>
+            <h3 class="font-headline text-2xl font-extrabold text-on-surface dark:text-white">{{ refreshed_at }}</h3>
+        </div>
+    </div>
+
+    <div>
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-headline text-2xl font-bold dark:text-white">Fund Universe</h3>
+            <div class="flex space-x-2 bg-surface-container-low dark:bg-slate-800/80 p-1 rounded-full category-tabs">
+                {% for category, items in categories.items() %}
+                {% set lead = items[0] if items else {} %}
+                <button data-category="{{ category }}" 
+                        data-feature-title="{{ lead.title|escape if lead else category ~ ' mutual fund updates' }}"
+                        data-feature-summary="{{ lead.summary|escape if lead else 'Live headlines will appear here when relevant stories are available.' }}"
+                        data-feature-link="{{ lead.link|escape if lead else '#' }}"
+                        class="category-pill px-6 py-2 rounded-full font-bold text-sm transition-colors 
+                    {% if category == default_category %}bg-blue-600 text-white shadow-md active-tab{% else %}text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-highest dark:hover:bg-slate-700{% endif %}">
+                    {{ category }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6">
+            <div class="col-span-2 bg-surface-container-lowest dark:bg-slate-800 p-10 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700 relative overflow-hidden flex flex-col justify-center transition-colors">
+                <div class="relative z-10 w-3/4">
+                    <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-md mb-4 inline-block shadow-sm">Featured Insight</span>
+                    <h2 id="featured-title" class="font-headline text-3xl font-bold mb-4 leading-tight dark:text-white">{{ featured_article.title }}</h2>
+                    <p id="featured-summary" class="text-on-surface-variant dark:text-slate-300 mb-8 leading-relaxed">{{ featured_article.summary }}</p>
+                    <a id="featured-link" href="{{ featured_article.link }}" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold flex items-center space-x-2 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+                        <span>Explore Detailed Analysis</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+                <div class="absolute right-[-10%] bottom-[-20%] opacity-20 w-64 h-64 pointer-events-none">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#004AC6" d="M47.7,-57.2C59.4,-47.3,64.8,-28.9,65.3,-11.1C65.8,6.8,61.4,24.1,51.8,38.5C42.2,52.8,27.4,64.3,9.5,67.6C-8.4,70.9,-29.4,66,-45.5,53.4C-61.5,40.8,-72.6,20.4,-73.2,-0.4C-73.8,-21.2,-63.9,-42.4,-48.5,-52.6C-33.1,-62.8,-12.3,-62,-3.5,-57.8C5.3,-53.6,24.4,-67.2,36,-67.1C47.7,-67,46.7,-65.4,47.7,-57.2Z" transform="translate(100 100) scale(1.1)"/>
+                    </svg>
+                </div>
+            </div>
+
+            <a href="{{ url_for('ai.chatbot') }}" class="col-span-1 p-8 rounded-2xl primary-gradient text-white shadow-xl shadow-blue-500/20 flex flex-col justify-between group overflow-hidden relative transition-transform hover:-translate-y-1">
+                <div class="relative z-10">
+                    <h3 class="font-headline text-xl font-bold mb-4">AI Analysis Prompt</h3>
+                    <p class="text-sm opacity-90 leading-relaxed mb-8">
+                        Compare Large Cap funds with a focus on Alpha and Beta correlation over 3 years.
+                    </p>
+                </div>
+                <div class="relative z-10 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                    <p class="text-xs font-medium italic opacity-80">
+                        "Chat with our AI assessing {{ total_articles }} live strategies..."
+                    </p>
+                </div>
+                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300"></div>
+                <span class="material-symbols-outlined absolute right-[-20px] top-[-20px] text-white/10 text-[120px] group-hover:rotate-12 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">psychology</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-12">
+        <div class="flex justify-between items-center border-b border-outline-variant/10 dark:border-slate-700 pb-4 mb-6">
+            <div class="flex items-center space-x-4">
+                <h3 class="font-headline text-xl font-bold dark:text-white">Latest Factsheets & News</h3>
+                <a href="{{ url_for('dashboard.factsheets') }}" class="bg-primary/10 dark:bg-blue-900/40 text-primary dark:text-blue-300 hover:bg-primary/20 dark:hover:bg-blue-900/60 text-xs font-bold px-4 py-1.5 rounded-full transition-colors">Access Factsheet Library</a>
+            </div>
+            <a href="{{ url_for('dashboard.dashboard') }}" class="text-xs font-bold text-primary dark:text-blue-400 hover:underline">Refresh Feed</a>
+        </div>
+
+        {% for category, articles in categories.items() %}
+        <div class="news-panel {% if category != default_category %}hidden{% endif %}" data-panel="{{ category }}">
+            {% if articles %}
+            <div class="space-y-4">
+                {% for article in articles %}
+                <a href="{{ article.link }}" target="_blank" class="block bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-outline-variant/10 dark:border-slate-700 hover:border-primary/30 dark:hover:border-primary/50 hover:shadow-md transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <h4 class="font-headline font-bold text-on-surface dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors text-lg">{{ article.title }}</h4>
+                        </div>
+                        <span class="text-xs font-bold text-outline dark:text-slate-500 uppercase tracking-wider whitespace-nowrap ml-4">{{ article.published }}</span>
+                    </div>
+                    <div class="pl-4 flex justify-between items-end">
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 line-clamp-2 max-w-3xl">{{ article.summary }}</p>
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 px-3 py-1 rounded-full">{{ article.source }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center p-8 bg-surface-container-lowest dark:bg-slate-800 rounded-2xl border border-outline-variant/10 dark:border-slate-700 border-dashed">
+                <p class="text-on-surface-variant dark:text-slate-400">No active updates available in this category.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll('.category-pill');
+        const panels = document.querySelectorAll('.news-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'active-tab');
+                    t.classList.add('text-on-surface-variant', 'dark:text-slate-300', 'hover:bg-surface-container-highest', 'dark:hover:bg-slate-700');
+                });
+                
+                tab.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'active-tab');
+                tab.classList.remove('text-on-surface-variant', 'dark:text-slate-300', 'hover:bg-surface-container-highest', 'dark:hover:bg-slate-700');
+
+                const selectedCat = tab.dataset.category;
+                panels.forEach(p => {
+                    if (p.dataset.panel === selectedCat) {
+                        p.classList.remove('hidden');
+                    } else {
+                        p.classList.add('hidden');
+                    }
+                });
+
+                const fTitle = document.getElementById("featured-title");
+                const fSummary = document.getElementById("featured-summary");
+                const fLink = document.getElementById("featured-link");
+                
+                if (fTitle && fSummary && fLink) {
+                    fTitle.innerText = tab.dataset.featureTitle;
+                    fSummary.innerText = tab.dataset.featureSummary;
+                    fLink.href = tab.dataset.featureLink;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
